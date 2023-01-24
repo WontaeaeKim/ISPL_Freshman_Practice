@@ -93,6 +93,12 @@ def save_pickle(data_dict):
 def data_augment(image):
     # TODO: use cv2.flip, cv2.rotate, cv2.resize and save each augmented image
     cv2.imwrite("./original.jpg",image)
+    cv2.imwrite('./horizontal_flip.jpg', cv2.flip(image, 1))
+    cv2.imwrite('./vertical_flip.jpg', cv2.flip(image, 0))
+    cv2.imwrite('./rotate_90_cw.jpg', cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE))
+    cv2.imwrite('./rotate_90_ccw.jpg', cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE))
+    cv2.imwrite('./rotate_180.jpg', cv2.rotate(image, cv2.ROTATE_180))
+    cv2.imwrite('./resize.jpg', cv2.resize(image, (32, 32)))
 
 if __name__ == "__main__":
     main()
