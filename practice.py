@@ -1,25 +1,28 @@
 import os
 import glob
-import path
+#import path
 import cv2
 import numpy as np
 from collections import OrderedDict
 import pickle
+from zipfile import ZipFile
 
 def main():
+    unzip_mnist_file('./')
+
     train_path = "./mnist/train/"
     test_path = "./mnist/test/"
-
+    
     train_paths = glob.glob(train_path + '/*/*')
     test_paths = glob.glob(test_path + '/*/*')
-
+    
     train_dataset = read_image_and_label(train_paths)
     test_dataset = read_image_and_label(test_paths)
 
     save_npy(train_dataset, test_dataset)
 
     data_dict = read_npy()
-
+    
     save_pickle(data_dict)
 
     image = data_dict['train_image'][0]
@@ -27,12 +30,32 @@ def main():
     data_augment(image)
 
 
+def unzip_mnist_file(paths):
+    try:
+        if not os.path.exists(paths + 'mnist'):
+           with ZipFile(paths + 'mnist.zip') as zipper:
+               print('start to unzip mnist.zip file')
+               os.makedirs(paths + 'mnist/')
+               zipper.extractall(path=(paths + 'mnist/'))
+               print('successfully unzip mnist.zip file')
+        else:
+            print('MNIST directory is alrady exist')
+    except OSError:
+        print('Error: Fail to unzip')  
 
 def read_image_and_label(paths):
     # TODO: with image folders path, read images and make label with image paths)
     # DO NOT use dataset zoo from pytorch or tensorflow
-    images = None
-    labels = None
+    images = []
+    labels = []
+    
+    for img_path in paths:
+        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+        label = img_path.replace('\\','/').split('/')[-2]
+        
+        images.append(img)
+        labels.append(int(label))
+       
     return images, labels
 
 
@@ -55,11 +78,17 @@ def read_npy():
             }
      """
     data_dict = OrderedDict()
+    data_dict['train_image'] = np.load("./train_images.npy")
+    data_dict['train_label'] = np.load("./train_labels.npy")
+    data_dict['test_image'] = np.load("./test_images.npy")
+    data_dict['test_label'] = np.load("./test_labels.npy")
+        
     return data_dict
 
 def save_pickle(data_dict):
     # TODO: save data_dict as pickle (erase "return 0" when you finish write your code)
-    return 0
+    with open('data.pickle', 'wb') as f:
+        pickle.dump(data_dict, f)
 
 def data_augment(image):
     # TODO: use cv2.flip, cv2.rotate, cv2.resize and save each augmented image
